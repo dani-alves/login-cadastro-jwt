@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -5,7 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const { Sequelize, DataTypes } = require('sequelize');
-require('dotenv').config();
+
 
 // Middlewares
 app.use(cors());
@@ -24,7 +25,9 @@ const sequelize = new Sequelize(
     host: process.env.MYSQLHOST,
     port: process.env.MYSQLPORT,
     dialect: 'mysql',
-    logging: false, // opcional: desativa logs SQL
+    dialectOptions: {
+      ssl: true
+    }
   }
 );
 
