@@ -9,7 +9,11 @@ const { Sequelize, DataTypes } = require('sequelize');
 
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: 'https://front-end-cadastro-login-twj.vercel.app', // Permitir apenas o domínio do frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
+  allowedHeaders: ['Content-Type', 'Authorization'], // Cabeçalhos permitidos
+}));
 app.use(express.json());
 
 // Configurações
