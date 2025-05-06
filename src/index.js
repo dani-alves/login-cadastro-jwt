@@ -1,26 +1,22 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+
 const { Sequelize, DataTypes } = require('sequelize');
-const cors = require('cors');
+
+
+// Middlewares
+app.use(cors());
+app.use(express.json());
 
 // Configurações
 const PORT = process.env.PORT || 3001;
 const SECRET = process.env.JWT_SECRET;
 
-// Middleware para permitir CORS
-app.use(cors({
-  origin: 'https://front-end-cadastro-login-twj.vercel.app', // Permitir apenas o domínio do frontend
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'], // Cabeçalhos permitidos
-}));
-
-// Middleware para interpretar JSON
-app.use(express.json());
-
-// Conexão com o banco de dados
+// Conexão com Banco
 const sequelize = new Sequelize(
   process.env.MYSQLDATABASE,
   process.env.MYSQLUSER,
@@ -32,13 +28,16 @@ const sequelize = new Sequelize(
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false,
-      },
-    },
+        rejectUnauthorized: false
+      }
+    }
   }
 );
 
-// Modelo de usuário
+
+
+
+// Modelo
 const User = sequelize.define('user', {
   nome: {
     type: DataTypes.STRING,
@@ -57,11 +56,11 @@ const User = sequelize.define('user', {
   freezeTableName: true, // Evita pluralização do nome da tabela
 });
 
-// Sincronizar banco de dados
+// Sincronizar Banco
 sequelize
   .sync()
   .then(() => console.log('Banco de dados conectado e tabelas sincronizadas'))
-  .catch((err) => console.error('Erro ao conectar ao banco de dados:', err));
+  .catch((err) => console.error('Erro ao conectar:', err));
 
 // Middleware de autenticação
 function autenticarToken(req, res, next) {
@@ -82,33 +81,33 @@ function autenticarToken(req, res, next) {
   });
 }
 
-// Rotas
+// ROTAS
 
 // Cadastro de usuário
 app.post('/usuarios', async (req, res) => {
-  console.log('Requisição recebida:', req.body); // Log para depuração
-  try {
-    const { nome, email, senha } = req.body;
-
-    if (!nome || !email || !senha) {
-      return res.status(400).json({ erro: 'Todos os campos são obrigatórios' });
+    console.log('Requisição recebida:', req.body); // Adicione este log
+    try {
+      const { nome, email, senha } = req.body;
+  
+      if (!nome || !email || !senha) {
+        return res.status(400).json({ erro: 'Todos os campos são obrigatórios' });
+      }
+  
+      const saltRounds = 10;
+      const senhaHash = await bcrypt.hash(senha, saltRounds);
+  
+      const user = await User.create({ nome, email, senha: senhaHash });
+      res.status(201).json({ mensagem: 'Usuário criado!', user });
+    } catch (error) {
+      console.error('Erro na criação do usuário:', error); // Adicione este log
+      res.status(400).json({ erro: error.message });
     }
-
-    const saltRounds = 10;
-    const senhaHash = await bcrypt.hash(senha, saltRounds);
-
-    const user = await User.create({ nome, email, senha: senhaHash });
-    res.status(201).json({ mensagem: 'Usuário criado com sucesso!', user });
-  } catch (error) {
-    console.error('Erro na criação do usuário:', error); // Log para depuração
-    res.status(400).json({ erro: error.message });
-  }
-});
+  });
 
 // Login de usuário
 app.post('/login', async (req, res) => {
-  console.log('Requisição recebida:', req.body); // Log para depuração
   try {
+    console.log('Requisição recebida:', req.body); // Log para depuração
     const { email, senha } = req.body;
 
     const user = await User.findOne({ where: { email } });
@@ -140,3 +139,4 @@ app.post('/login', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
