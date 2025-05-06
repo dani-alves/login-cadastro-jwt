@@ -17,15 +17,17 @@ const SECRET = process.env.JWT_SECRET;
 
 // Conexão com Banco
 const sequelize = new Sequelize(
-  process.env.DB_DATABASE,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+  process.env.MYSQLDATABASE,
+  process.env.MYSQLUSER,
+  process.env.MYSQLPASSWORD,
   {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
+    host: process.env.MYSQLHOST,
+    port: process.env.MYSQLPORT,
     dialect: 'mysql',
+    logging: false, // opcional: desativa logs SQL
   }
 );
+
 
 // Modelo
 const User = sequelize.define('user', {
@@ -129,3 +131,4 @@ app.post('/login', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
