@@ -1,4 +1,5 @@
 require('dotenv').config();
+const cors = require('cors');
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
@@ -7,16 +8,8 @@ const jwt = require('jsonwebtoken');
 const { Sequelize, DataTypes } = require('sequelize');
 
 
-// Middlewares
-const cors = require('cors');
 
-// Permitir o front-end
-app.use(cors({
-  origin: 'https://front-end-cadastro-login-twj.vercel.app', // seu domínio do front-end
-  methods: ['GET', 'POST'], // Métodos permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'] // Cabeçalhos permitidos
-}));
-
+app.use(cors())
 
 
 app.use(express.json());
